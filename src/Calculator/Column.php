@@ -31,7 +31,7 @@ class Column
     private $name;
     
    /**
-    * @var int
+    * @var float
     */
     private $value;
     
@@ -40,7 +40,7 @@ class Column
     */
     private $missing = false;
     
-    public function __construct(Calculator $calculator, string $name, int $value)
+    public function __construct(Calculator $calculator, string $name, float $value)
     {
         $this->calculator = $calculator;
         $this->name = $name;
@@ -58,12 +58,12 @@ class Column
         return $this->missing;
     }
     
-    public function getValue() : int
+    public function getValue() : float
     {
         return $this->value;
     }
     
-    public function setValue(int $value) : void
+    public function setValue(float $value) : void
     {
         $this->value = $value;
     }
