@@ -10,9 +10,14 @@ declare (strict_types=1);
 
 namespace Mistralys\WidthsCalculator;
 
-use Mistralys\WidthsCalculator\Calculator\Column;
 use AppUtils\Traits_Optionable;
 use AppUtils\Interface_Optionable;
+use Mistralys\WidthsCalculator\Calculator\Column;
+use Mistralys\WidthsCalculator\Calculator\Operations;
+use Mistralys\WidthsCalculator\Calculator\OverflowFixer;
+use Mistralys\WidthsCalculator\Calculator\SurplusRemover;
+use Mistralys\WidthsCalculator\Calculator\MissingFiller;
+use Mistralys\WidthsCalculator\Calculator\LeftoverFiller;
 
 /**
  * Calculates percentual column widths given a list of 
@@ -33,24 +38,9 @@ class Calculator implements Interface_Optionable
     use Traits_Optionable;
     
    /**
-    * @var integer
-    */
-    private $amountCols = 0;
-
-   /**
-    * @var integer
-    */
-    private $maxTotal = 100;
-    
-   /**
     * @var Column[]
     */
     private $columns = array();
-    
-   /**
-    * @var integer
-    */
-    private $missing = 0;
     
    /**
     * @var boolean
@@ -58,7 +48,12 @@ class Calculator implements Interface_Optionable
     private $calculated = false;
     
    /**
-    * @param string[]number $columnValues
+    * @var Operations
+    */
+    private $operations;
+    
+   /**
+    * @param array<string,float> $columnValues
     */
     private function __construct(array $columnValues)
     {
@@ -69,19 +64,41 @@ class Calculator implements Interface_Optionable
                 floatval($value)
             );
         }
+        
+        $this->operations = new Operations($this);
     }
     
+   /**
+    * Creates an instance of the calculator.
+    * 
+    * @param array<string,float> $columnValues
+    * @return Calculator
+    */
     public static function create(array $columnValues) : Calculator
     {
         return new Calculator($columnValues);
     }
     
+   /**
+    * @return array<string,mixed>
+    */
     public function getDefaultOptions(): array
     {
         return array(
+            'maxTotal' => 100,
             'minPerCol' => 1,
             'integerValues' => true
         );
+    }
+    
+    public function getMaxTotal() : float
+    {
+        return floatval($this->getOption('maxTotal'));
+    }
+    
+    public function getOperations() : Operations
+    {
+        return $this->operations;
     }
     
     public function setFloatValues(bool $enable=true) : Calculator
@@ -116,7 +133,7 @@ class Calculator implements Interface_Optionable
     
     public function getMaxMinWidth() : float
     {
-        return $this->maxTotal / $this->amountCols;
+        return $this->getMaxTotal() / $this->operations->countColumns();
     }
     
     private function addColumn(string $name, float $value) : void
@@ -126,13 +143,6 @@ class Calculator implements Interface_Optionable
             $name,
             $value
         );
-        
-        if($col->isMissing())
-        {
-            $this->missing++;
-        }
-        
-        $this->amountCols++;
         
         $this->columns[] = $col;
     }
@@ -153,23 +163,42 @@ class Calculator implements Interface_Optionable
             return;
         }
         
-        if($this->calcTotal() > $this->maxTotal)
+        if($this->operations->calcTotal() > $this->getMaxTotal())
         {
             $this->fixOverflow();
         }
         
         $this->fillMissing();
         $this->removeSurplus();
+        $this->convertToInteger();
         $this->fillLeftover();
         
         $this->calculated = true;
     }
     
    /**
+    * Adjusts the individual column values to match
+    * the expected output format, for example ensuring
+    * integer values if we are in integer mode.
+    */
+    private function convertToInteger() : void
+    {
+        // convert all columns to integer values as required
+        if($this->isIntegerMode())
+        {
+            foreach($this->columns as $col)
+            {
+                $val = intval(floor($col->getValue()));
+                $col->setValue(floatval($val));
+            }
+        }
+    }
+    
+   /**
     * Retrieves the updated list of column values, 
     * retaining the original keys.
     * 
-    * @return array
+    * @return array<string,int|float>
     */
     public function getValues() : array
     {
@@ -181,7 +210,7 @@ class Calculator implements Interface_Optionable
         {
             $val = $col->getValue();
             
-            if($this->getBoolOption('integerValues'))
+            if($this->isIntegerMode())
             {
                 $val = intval($val);
             }
@@ -192,76 +221,23 @@ class Calculator implements Interface_Optionable
         return $result;
     }
     
-    private function calcTotal() : float
+    public function isIntegerMode() : bool
     {
-        $total = 0;
-        
-        foreach($this->columns as $col)
-        {
-            $total += $col->getValue();
-        }
-        
-        return $total;
+        return $this->getBoolOption('integerValues');
+    }
+    
+   /**
+    * @return Column[]
+    */
+    public function getColumns() : array 
+    {
+        return $this->columns;
     }
     
     private function removeSurplus() : void
     {
-        $leftover = $this->maxTotal - $this->calcTotal();
-        
-        if($leftover >= 0)
-        {
-            return;
-        }
-
-        $leftover = $leftover * -1;
-        $baseTotal = $this->calcTotalNotMissing();
-        $min = $this->getMinWidth();
-        
-        foreach($this->columns as $col)
-        {
-            if($col->isMissing())
-            {
-                continue;
-            }
-            
-            if($leftover <= 0)
-            {
-                break;
-            }
-            
-            $percent = $col->getValue() * 100 / $baseTotal;
-            $amount = round($leftover * $percent / 100);
-            $val = $col->getValue() - $amount;
-            
-            if($val < $min)
-            {
-                continue;
-            }
-            
-            $leftover -= $amount;
-            
-            $col->setValue($val);
-        }
-        
-        if($leftover > 0)
-        {
-            $this->removeSurplus();
-        }
-    }
-    
-    private function calcTotalNotMissing() : float
-    {
-        $total = 0;
-        
-        foreach($this->columns as $col)
-        {
-            if(!$col->isMissing())
-            {
-                $total += $col->getValue();
-            }
-        }
-        
-        return $total;
+        $surplus = new SurplusRemover($this);
+        $surplus->remove();
     }
     
    /**
@@ -272,97 +248,19 @@ class Calculator implements Interface_Optionable
     */
     private function fillLeftover() : void
     {
-        $this->adjustLeftoverValues();
-        
-        $leftover = $this->maxTotal - $this->calcTotal();
-        $perCol = $leftover / $this->amountCols;
-
-        if($this->getBoolOption('integerValues'))
-        {
-            $perCol = (int)ceil($perCol);
-        }
-        
-        for($i=($this->amountCols-1); $i >=0; $i--)
-        {
-            if($leftover <= 0)
-            {
-                break;
-            }
-            
-            $leftover -= $perCol;
-            
-            $col = $this->columns[$i];
-            
-            $val = $col->getValue() + $perCol;
-            
-            $col->setValue($val);
-        }
-    }
-    
-   /**
-    * Adjusts the individual column values to match
-    * the expected output format, for example ensuring
-    * integer values if we are in integer mode.
-    */
-    private function adjustLeftoverValues() : void
-    {
-        // convert all columns to integer values as required
-        if($this->getBoolOption('integerValues'))
-        {
-            foreach($this->columns as $col)
-            {
-                $val = intval(floor($col->getValue()));
-                $col->setValue(floatval($val));
-            }
-        }
+        $filler = new LeftoverFiller($this);
+        $filler->fill();
     }
     
     private function fillMissing() : void
     {
-        if($this->missing === 0)
-        {
-            return;
-        }
-        
-        $toDistribute = $this->maxTotal - $this->calcTotal();
-        
-        if($toDistribute <= 0)
-        {
-            $toDistribute = $this->getMinWidth() * $this->missing;
-        }
-        
-        $perMissingCol = $toDistribute / $this->missing;
-        
-        foreach($this->columns as $col)
-        {
-            if($col->isMissing())
-            {
-                $col->setValue($perMissingCol);
-            }
-        }
+        $filling = new MissingFiller($this);
+        $filling->fill();
     }
     
     private function fixOverflow() : void
     {
-        $total = $this->calcTotal();
-
-        // to allow space for the missing columns, we base the 
-        // total target percentage on the amount of columns that
-        // are not missing.
-        $maxTotal = $this->maxTotal / ($this->amountCols - $this->missing);
-        
-        foreach($this->columns as $col)
-        {
-            // no change for missing columns, they get filled later
-            if($col->isMissing())
-            {
-                continue;
-            }
-            
-            $percentage = $col->getValue() * 100 / $total;
-            $adjusted = floor($maxTotal * $percentage / 100);
-            
-            $col->setValue((int)$adjusted);
-        }
+        $overflow = new OverflowFixer($this);
+        $overflow->fix();
     }
 }
