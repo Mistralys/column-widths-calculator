@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/Mistralys/column-widths-calculator.svg?branch=master)](https://travis-ci.com/Mistralys/column-widths-calculator)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Mistralys/column-widths-calculator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Mistralys/column-widths-calculator/?branch=master)
+
 # Column widths calculator
 
 Small utility that can be used to convert arbitrary numeric values to column widths. Given a list of column names and values, it will intelligently convert the values to percentages, and fill empty columns with meaningful values.
@@ -127,7 +130,7 @@ Col2 = 900
 Col3 = 700
 ```
 
-This will be converted to the follwing values:
+This will be converted to the following values:
 
 ```
 Col1 = 38
@@ -141,7 +144,7 @@ Col3 = 30
 
 As long as there are more than one column with values, missing values will be filled with a value based on an average of the existing values, to get realistic results.
 
-For example, the following values:
+For example, the values:
 
 ```
 Col1 = 1400
