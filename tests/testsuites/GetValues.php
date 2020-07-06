@@ -41,9 +41,9 @@ class GetValuesTestCase extends CalculatorTestCase
                     'three' => 0
                 ),
                 'expected' => array(
-                    'one' => 33,
-                    'two' => 33,
-                    'three' => 34
+                    'one' => 98,
+                    'two' => 1,
+                    'three' => 1
                 )
             ),
             array(
@@ -71,6 +71,66 @@ class GetValuesTestCase extends CalculatorTestCase
                     'one' => 19,
                     'two' => 30,
                     'three' => 51
+                )
+            ),
+            array(
+                'label' => 'Above 100%, all columns filled',
+                'values' => array(
+                    'one' => 1400,
+                    'two' => 900,
+                    'three' => 700
+                ),
+                // leftover percentages are filled from the last one upwards
+                'expected' => array(
+                    'one' => 38,
+                    'two' => 33,
+                    'three' => 30
+                )
+            ),
+            array(
+                'label' => 'Above 100%, several empty columns',
+                'values' => array(
+                    'one' => 1400,
+                    'two' => 900,
+                    'three' => 0,
+                    'four' => 0
+                ),
+                'expected' => array(
+                    'one' => 30,
+                    'two' => 19,
+                    'three' => 25,
+                    'four' => 26
+                )
+            ),
+            array(
+                'label' => 'Above 100%, single filled column',
+                'values' => array(
+                    'one' => 1400,
+                    'two' => 0,
+                    'three' => 0
+                ),
+                'expected' => array(
+                    'one' => 98,
+                    'two' => 1,
+                    'three' => 1
+                )
+            ),
+            array(
+                'label' => 'Single column array, below 100%',
+                'values' => array(
+                    'one' => 80
+                ),
+                'expected' => array(
+                    'one' => 100
+                )
+            ),
+            array(
+                'label' => 'Single column array, above 100%',
+                'values' => array(
+                    'one' => 8045
+                ),
+                'expected' => array(
+                    'one' => 100
                 )
             )
         );
