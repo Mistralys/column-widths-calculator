@@ -22,7 +22,7 @@
 	"prefer-stable" : true,
 	"require" : 
 	{
-		"mistralys/application-utils": "^1.2"
+		"mistralys/application-utils": "^1.1"
 	},
 	"require-dev" : 
 	{
