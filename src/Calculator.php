@@ -96,6 +96,12 @@ class Calculator implements Interface_Optionable
         return floatval($this->getOption('maxTotal'));
     }
     
+    public function setMaxTotal(float $total) : Calculator
+    {
+        $this->setOption('maxTotal', $total);
+        return $this;
+    }
+    
     public function getOperations() : Operations
     {
         return $this->operations;
@@ -224,6 +230,21 @@ class Calculator implements Interface_Optionable
     public function isIntegerMode() : bool
     {
         return $this->getBoolOption('integerValues');
+    }
+    
+   /**
+    * Retrieves the column values as pixel values, based on
+    * the target available pixel width.
+    * 
+    * @param int $targetWidth
+    * @return array<string,int>
+    */
+    public function getPixelValues(int $targetWidth) : array
+    {
+        $calc = Calculator::create($this->getValues());
+        $calc->setMaxTotal($targetWidth);
+        
+        return $calc->getValues();
     }
     
    /**
