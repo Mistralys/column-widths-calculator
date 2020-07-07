@@ -84,7 +84,7 @@ class GetValuesTestCase extends CalculatorTestCase
                 'expected' => array(
                     'one' => 38,
                     'two' => 33,
-                    'three' => 30
+                    'three' => 29
                 )
             ),
             array(
@@ -138,7 +138,11 @@ class GetValuesTestCase extends CalculatorTestCase
         foreach($tests as $test)
         {
             $result = Calculator::create($test['values'])->getValues();
-
+            
+            $values = array_values($result);
+            $total = array_sum($values);
+            
+            $this->assertEquals(100, $total, $test['label']);
             $this->assertEquals($test['expected'], $result, $test['label']);
         }
     }

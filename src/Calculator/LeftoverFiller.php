@@ -46,12 +46,12 @@ class LeftoverFiller
     {
         $leftover = $this->calculator->getMaxTotal() - $this->operations->calcTotal();
         $perCol = $leftover / $this->operations->countColumns();
-        
+
         if($this->calculator->isIntegerMode())
         {
             $perCol = (int)ceil($perCol);
         }
-        
+
         for($i=($this->operations->countColumns()-1); $i >=0; $i--)
         {
             if($leftover <= 0)
@@ -67,5 +67,26 @@ class LeftoverFiller
             
             $col->setValue($val);
         }
+
+        $this->cleanUp($leftover);
+    }
+    
+   /**
+    * In integer mode, after filling all items, because of rounding
+    * the amount of column up, we may have added a bit too much. We
+    * fix this here, by removing it from the last column.
+    * 
+    * @param float $leftover
+    */
+    private function cleanUp(float $leftover) : void
+    {
+        if($leftover >= 0)
+        {
+            return;
+        }
+        
+        $col = array_pop($this->columns);
+        
+        $col->setValue($col->getValue() + $leftover);
     }
 }
