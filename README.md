@@ -164,4 +164,41 @@ Col4 = 26
 = 100%
 ```
 
+## Changing the target value
 
+By default, the Calculator assumes you want to work with percentages, and has the target value locked to 100. However, it is possible to adjust this value:
+
+```php
+$calc = Calculator::create($columns);
+$calc->setMaxTotal(1000);
+```
+
+In the example above, the column widths will be calculated to reach a total of 1000, instead of the default 100.
+
+## Converting to absolute pixel values
+
+For convenience, the `getPixelValues()` method can convert the column percentages to absolute pixel values, given the maximum target width.
+
+The following example converts the column widths to reach a width of 600px:
+
+```php
+$cols = array(
+    'Col1' => 40,
+    'Col2' => 40,
+    'Col3' => 20
+);
+
+$calc = Calculator::create($columns);
+
+$pixelWidths = $calc->getPixelValues(600);
+```
+
+The resulting widths will be:
+
+```
+Col1 = 207
+Col2 = 207
+Col3 = 186
+
+= 600
+```
