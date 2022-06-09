@@ -18,15 +18,21 @@
 			"src/"
 		]
 	},
+	"autoload-dev": {
+		"classmap" :
+		[
+			"tests/assets/classes"
+		]
+	},
 	"minimum-stability" : "dev",
 	"prefer-stable" : true,
 	"require" : 
 	{
-		"mistralys/application-utils": "^1.0.10"
+		"mistralys/application-utils": ">=1.1"
 	},
 	"require-dev" : 
 	{
-		"phpunit/phpunit" : "8.2.5",
-        "phpstan/phpstan" : "^0.12"
+		"phpunit/phpunit" : ">=9.5",
+        "phpstan/phpstan" : ">=1.7"
 	}
 }
