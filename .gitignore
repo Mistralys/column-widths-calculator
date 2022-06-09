@@ -1,5 +1,4 @@
 .phpunit.result.cache
-composer.lock
 docs/phpstan/output.txt
 vendor/
 docs/config/cache/nette.configurator
