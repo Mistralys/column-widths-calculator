@@ -20,20 +20,20 @@ use Mistralys\WidthsCalculator\Calculator\MissingFiller;
 use Mistralys\WidthsCalculator\Calculator\LeftoverFiller;
 
 /**
- * Calculates percentual column widths given a list of 
+ * Calculates percent-based column widths given a list of
  * column names with user width values.
  *
  * Columns with 0 width are filled automatically with
  * the leftover percent. Values out of bounds are 
  * normalized proportionally, allowing the use of an
- * arbitrary numering system to convert to percent.
+ * arbitrary numbering system to convert to percent.
  *
  * @package WidthsCalculator
  * @author Sebastian Mordziol <s.mordziol@mistralys.eu>
  */
 class Calculator implements Interface_Optionable
 {
-    const ERROR_INVALID_MIN_WIDTH = 61501;
+    public const ERROR_INVALID_MIN_WIDTH = 61501;
     
     use Traits_Optionable;
     
@@ -145,7 +145,6 @@ class Calculator implements Interface_Optionable
     private function addColumn(string $name, float $value) : void
     {
         $col = new Column(
-            $this,
             $name,
             $value
         );
@@ -241,10 +240,17 @@ class Calculator implements Interface_Optionable
     */
     public function getPixelValues(int $targetWidth) : array
     {
-        $calc = Calculator::create($this->getValues());
+        $calc = self::create($this->getValues());
         $calc->setMaxTotal($targetWidth);
+        $values = $calc->getValues();
+
+        $result = array();
+        foreach($values as $name => $value)
+        {
+            $result[$name] = (int)$value;
+        }
         
-        return $calc->getValues();
+        return $result;
     }
     
    /**
