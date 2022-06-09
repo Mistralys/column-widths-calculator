@@ -20,20 +20,13 @@ use Mistralys\WidthsCalculator\Calculator;
  */
 class LeftoverFiller
 {
-    /**
-     * @var Calculator
-     */
-    private $calculator;
-    
-    /**
-     * @var Operations
-     */
-    private $operations;
+    private Calculator $calculator;
+    private Operations $operations;
     
    /**
     * @var Column[]
     */
-    private $columns = array();
+    private array $columns;
     
     public function __construct(Calculator $calculator)
     {
@@ -80,11 +73,11 @@ class LeftoverFiller
     */
     private function cleanUp(float $leftover) : void
     {
-        if($leftover >= 0)
+        if($leftover >= 0 || empty($this->columns))
         {
             return;
         }
-        
+
         $col = array_pop($this->columns);
         
         $col->setValue($col->getValue() + $leftover);

@@ -20,20 +20,9 @@ use Mistralys\WidthsCalculator\Calculator;
  */
 class MissingFiller
 {
-    /**
-     * @var Calculator
-     */
-    private $calculator;
-    
-    /**
-     * @var Operations
-     */
-    private $operations;
-    
-   /**
-    * @var integer
-    */
-    private $missing = 0;
+    private Calculator $calculator;
+    private Operations $operations;
+    private int $missing;
     
     public function __construct(Calculator $calculator)
     {

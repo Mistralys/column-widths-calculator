@@ -13,7 +13,7 @@ namespace Mistralys\WidthsCalculator\Calculator;
 use Mistralys\WidthsCalculator\Calculator;
 
 /**
- * Handles converting values that are out of bounds to
+ * Handles converting values that are out of bounds for
  * values that the calculator can work with.
  *
  * @package WidthsCalculator
@@ -21,15 +21,8 @@ use Mistralys\WidthsCalculator\Calculator;
  */
 class  OverflowFixer
 {
-   /**
-    * @var Calculator
-    */
-    private $calculator;
-    
-   /**
-    * @var Operations
-    */
-    private $operations;
+    private Calculator $calculator;
+    private Operations $operations;
     
     public function __construct(Calculator $calculator)
     {

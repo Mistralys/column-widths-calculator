@@ -21,29 +21,16 @@ use Mistralys\WidthsCalculator\Calculator;
  */
 class Operations
 {
-    /**
-     * @var Calculator
-     */
-    private $calculator;
-
-    /**
-     * @var integer
-     */
-    private $amountCols = 0;
-    
-    /**
-     * @var integer
-     */
-    private $missing = 0;
+    private int $amountCols;
+    private int $missing = 0;
     
    /**
     * @var Column[]
     */
-    private $columns = array();
+    private array $columns;
     
     public function __construct(Calculator $calculator)
     {
-        $this->calculator = $calculator;
         $this->columns = $calculator->getColumns();
         $this->amountCols = count($this->columns);
         
@@ -92,5 +79,4 @@ class Operations
         
         return $total;
     }
-    
 }

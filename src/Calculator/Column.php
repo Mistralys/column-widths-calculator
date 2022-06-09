@@ -10,8 +10,6 @@ declare (strict_types=1);
 
 namespace Mistralys\WidthsCalculator\Calculator;
 
-use Mistralys\WidthsCalculator\Calculator;
-
 /**
  * Container class for a single column in the values list.
  *
@@ -20,29 +18,12 @@ use Mistralys\WidthsCalculator\Calculator;
  */
 class Column
 {
-   /**
-    * @var Calculator
-    */
-    private $calculator;
+    private string $name;
+    private float $value;
+    private bool $missing;
     
-   /**
-    * @var string
-    */
-    private $name;
-    
-   /**
-    * @var float
-    */
-    private $value;
-    
-   /**
-    * @var boolean
-    */
-    private $missing = false;
-    
-    public function __construct(Calculator $calculator, string $name, float $value)
+    public function __construct(string $name, float $value)
     {
-        $this->calculator = $calculator;
         $this->name = $name;
         $this->value = $value;
         $this->missing = $value <= 0;

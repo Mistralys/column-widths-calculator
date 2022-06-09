@@ -22,25 +22,10 @@ use Mistralys\WidthsCalculator\Calculator;
  */
 class SurplusRemover
 {
-    /**
-     * @var Calculator
-     */
-    private $calculator;
-    
-    /**
-     * @var Operations
-     */
-    private $operations;
-    
-   /**
-    * @var float
-    */
-    private $leftover = 0;
-    
-   /**
-    * @var float
-    */
-    private $baseTotal = 0;
+    private Calculator $calculator;
+    private Operations $operations;
+    private float $leftover = 0;
+    private float $baseTotal = 0;
     
     public function __construct(Calculator $calculator)
     {
@@ -57,7 +42,7 @@ class SurplusRemover
             return;
         }
         
-        $this->leftover = $this->leftover * -1; // we want a positive number
+        $this->leftover *= -1; // we want a positive number
         $this->baseTotal = $this->operations->calcTotalNotMissing();
         $cols = $this->calculator->getColumns();
         
