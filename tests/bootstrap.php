@@ -1,31 +1,21 @@
 <?php
 /**
- * Main bootstrapper used to set up the testsuites environment.
+ * Main bootstrapper used to set up the testsuite environment.
  * 
- * @package Mailcode
+ * @package WidthsCalculator
  * @subpackage Tests
  * @author Sebastian Mordziol <s.mordziol@mistralys.eu>
  */
 
-    /**
-     * The tests root folder (this file's location)
-     * @var string
-     */
-    define('TESTS_ROOT', __DIR__ );
+declare(strict_types=1);
 
-    $autoloader = realpath(TESTS_ROOT.'/../vendor/autoload.php');
-    
-    if($autoloader === false) 
-    {
-        die('ERROR: The autoloader is not present. Run composer install first.');
-    }
+const TESTS_ROOT = __DIR__;
 
-   /**
-    * The composer autoloader
-    */
-    require_once $autoloader;
+$autoloader = __DIR__.'/../vendor/autoload.php';
     
-   /**
-    * The test case base class for the testsuites.
-    */
-    require_once TESTS_ROOT.'/assets/classes/CalculatorTestCase.php';
+if(!file_exists($autoloader))
+{
+    die('ERROR: The autoloader is not present. Run composer install first.');
+}
+
+require_once $autoloader;
