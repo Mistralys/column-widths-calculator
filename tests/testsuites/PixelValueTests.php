@@ -1,10 +1,12 @@
 <?php
 
+namespace Mistralys\WidthsCalculatorUnitTests;
+
 use Mistralys\WidthsCalculator\Calculator;
 
-class PixelValuesTestCase extends CalculatorTestCase
+class PixelValueTests extends CalculatorTestCase
 {
-    public function test_getPixelValues()
+    public function test_getPixelValues() : void
     {
         $pixelValue = 600;
         

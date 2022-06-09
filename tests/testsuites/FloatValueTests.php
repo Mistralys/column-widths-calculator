@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mistralys\WidthsCalculatorUnitTests;
+
 use Mistralys\WidthsCalculator\Calculator;
 
-class FloatValuesTestCase extends CalculatorTestCase
+class FloatValueTests extends CalculatorTestCase
 {
-    public function test_floatValues()
+    public function test_floatValues() : void
     {
         $values = array(
             'col1' => 60.78,

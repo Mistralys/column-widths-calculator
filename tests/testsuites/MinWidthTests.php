@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mistralys\WidthsCalculatorUnitTests;
+
+use Exception;
 use Mistralys\WidthsCalculator\Calculator;
 
-class MinWidthTestCase extends CalculatorTestCase
+class MinWidthTests extends CalculatorTestCase
 {
-    public function test_setMinWidth()
+    public function test_setMinWidth() : void
     {
         $values = array(
             'col1' => 100,
@@ -24,7 +29,7 @@ class MinWidthTestCase extends CalculatorTestCase
         $this->assertEquals($expected, $calc->getValues());
     }
     
-    public function test_setMinWidth_surplus()
+    public function test_setMinWidth_surplus() : void
     {
         $values = array(
             'col1' => 80,
@@ -46,7 +51,7 @@ class MinWidthTestCase extends CalculatorTestCase
         $this->assertEquals($expected, $calc->getValues());
     }
     
-    public function test_surplus()
+    public function test_surplus() : void
     {
         $values = array(
             'col1' => 80,
@@ -67,7 +72,7 @@ class MinWidthTestCase extends CalculatorTestCase
         $this->assertEquals($expected, $calc->getValues());
     }
     
-    public function test_surplus_alternate()
+    public function test_surplus_alternate() : void
     {
         $values = array(
             'col1' => 70,
@@ -89,7 +94,7 @@ class MinWidthTestCase extends CalculatorTestCase
         $this->assertEquals($expected, $calc->getValues());
     }
     
-    public function test_maxMinWidth()
+    public function test_maxMinWidth() : void
     {
         $values = array(
             'col1' => 80,

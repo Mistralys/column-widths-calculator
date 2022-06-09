@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Mistralys\WidthsCalculatorUnitTests;
+
 use Mistralys\WidthsCalculator\Calculator;
 
-class GetValuesTestCase extends CalculatorTestCase
+class GetValueTests extends CalculatorTestCase
 {
-    public function test_getValues()
+    public function test_getValues() : void
     {
         $tests = array(
             array(
@@ -66,7 +70,7 @@ class GetValuesTestCase extends CalculatorTestCase
                     'two' => 29,
                     'three' => 50
                 ),
-                // leftover percentages are filled from the last one upwards
+                // leftover percentages are filled from the last upwards
                 'expected' => array(
                     'one' => 19,
                     'two' => 30,
@@ -80,7 +84,7 @@ class GetValuesTestCase extends CalculatorTestCase
                     'two' => 900,
                     'three' => 700
                 ),
-                // leftover percentages are filled from the last one upwards
+                // leftover percentages are filled from the last upwards
                 'expected' => array(
                     'one' => 38,
                     'two' => 33,
