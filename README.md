@@ -70,7 +70,7 @@ In this case, no rounding is done at all - you will have to manually handle any 
 
 ## Handling minimum widths
 
-When leaving columns empty to be automatically filled, there may not be enough width left for the columns to fill. Consider this columns configuration:
+When leaving columns empty to be automatically filled, there may not be enough width left for the columns to fill. Consider this configuration of columns:
 
 ```
 Col1 = 80
@@ -86,7 +86,7 @@ Col2 = 20
 Col3 = 1
 ```
 
-The surplus is substracted from all non-empty columns, proportionally to their size (without going below the minimum width). 
+The surplus is subtracted from all non-empty columns, proportionally to their size (without going below the minimum width). 
 
 ### Setting the minimum size
 
