@@ -26,6 +26,7 @@ class SurplusRemover
     private Operations $operations;
     private float $leftover = 0;
     private float $baseTotal = 0;
+    private int $depth = 0;
     
     public function __construct(Calculator $calculator)
     {
@@ -35,6 +36,11 @@ class SurplusRemover
     
     public function remove() : void
     {
+        $this->depth++;
+        if ($this->depth > 100) {
+            return;
+        }
+
         $this->leftover = $this->calculator->getMaxTotal() - $this->operations->calcTotal();
         
         if($this->leftover >= 0)

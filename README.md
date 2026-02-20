@@ -54,6 +54,19 @@ array(
 );
 ```
 
+## Fluent interface
+
+All configuration methods return the `Calculator` instance, allowing calls to be chained:
+
+```php
+$calc = Calculator::create($columns)
+    ->setMaxTotal(200)
+    ->setMinWidth(10)
+    ->setFloatValues();
+
+$converted = $calc->getValues();
+```
+
 ## Switching between integers and floats
 
 By default, the calculator will produce integer values, even if all internal calculations are float based for precision. This can be turned off to retrieve float values:
@@ -64,6 +77,16 @@ $calc->setFloatValues();
 ```
 
 In this case, no rounding is done at all - you will have to manually handle any rounding you wish to apply.
+
+To check whether the calculator is currently operating in integer mode, use `isIntegerMode()`:
+
+```php
+$calc = Calculator::create($columns);
+$calc->isIntegerMode(); // true (default)
+
+$calc->setFloatValues();
+$calc->isIntegerMode(); // false
+```
 
 ## Handling minimum widths
 
@@ -171,6 +194,32 @@ $calc->setMaxTotal(1000);
 ```
 
 In the example above, the column widths will be calculated to reach a total of 1000, instead of the default 100.
+
+## Edge cases
+
+### Negative values
+
+Column values that are negative are treated identically to `0` — they are considered **missing** and will be filled automatically, exactly like an empty column:
+
+```php
+$calc = Calculator::create(['A' => -10, 'B' => 50, 'C' => 0]);
+$result = $calc->getValues();
+// 'A' receives a positive width, same as if it were 0
+```
+
+### Empty column array
+
+Passing an empty array to `Calculator::create([])` does not throw immediately. However, calling `getValues()` on an empty-array calculator will throw a `\DivisionByZeroError` because the internal pipeline divides by the number of columns:
+
+```php
+// Will throw \DivisionByZeroError:
+$calc = Calculator::create([]);
+$result = $calc->getValues();
+```
+
+Always ensure at least one column is present before calling `getValues()`.
+
+---
 
 ## Converting to absolute pixel values
 

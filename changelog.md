@@ -1,3 +1,7 @@
+### v2.1.0 - Production bug-fix release
+- Fixed `OverflowFixer::fix()` incorrectly casting adjusted values to `int` in float mode, breaking the decimal precision guaranteed by `setFloatValues()`. The fix now applies the `(int)` cast only in integer mode via an `isIntegerMode()` conditional.
+- Fixed `SurplusRemover::remove()` lacking a recursion depth guard. A degenerate configuration where all columns are at `minWidth` and cannot absorb surplus would previously trigger a fatal stack overflow. A 100-iteration depth cap is now enforced via a private property, matching the safe upper bound for any realistic column setup.
+
 ### v2.0.0 - PHP 7.4 release
 - Upgraded the PHP code to 7.4 standards.
 - Loosened the `mistralys/application-utils` version constraint for more flexibility.

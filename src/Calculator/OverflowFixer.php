@@ -52,7 +52,11 @@ class  OverflowFixer
             $percentage = $col->getValue() * 100 / $total;
             $adjusted = floor($maxTotal * $percentage / 100);
             
-            $col->setValue((int)$adjusted);
+            if ($this->calculator->isIntegerMode()) {
+                $col->setValue((int)$adjusted);
+            } else {
+                $col->setValue($adjusted);
+            }
         }
     }
 }
