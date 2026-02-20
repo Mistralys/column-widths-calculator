@@ -35,6 +35,10 @@ Calculator::create(['A' => 40, 'B' => 0])
               │     minWidth), proportionally reduces non-missing
               │     columns (respecting minWidth). Runs recursively
               │     until surplus is fully absorbed.
+              │     Safety: recursion is capped at 100 iterations
+              │     via a private $depth counter (resets on new
+              │     Calculator instance). In normal operation,
+              │     convergence occurs in 1–3 passes.
               ├─ convertToInteger()
               └─ LeftoverFiller::fill()   Fill any rounding gap
                     └─► returns array<string, int|float>
@@ -55,7 +59,9 @@ Calculator::create(['A' => 1400, 'B' => 900, 'C' => 700])
               │     For each non-missing column:
               │       percentage = value * 100 / total
               │       adjusted   = floor(maxTotal * percentage / 100)
-              │     → A=46, B=30, C=23
+              │     Integer mode: setValue((int)$adjusted)  → A=46, B=30, C=23
+              │     Float mode:   setValue($adjusted)       → whole-number floats
+              │                   (floor() is retained; precision is preserved)
               ├─ MissingFiller::fill() SKIP
               ├─ SurplusRemover::remove() SKIP
               ├─ convertToInteger()

@@ -17,7 +17,7 @@ public const ERROR_INVALID_MIN_WIDTH = 61501;
 ### Factory
 
 ```php
-public static function create(array<string,float> $columnValues) : Calculator
+public static function create(array<array-key,float> $columnValues) : Calculator
 ```
 
 ### Configuration
@@ -45,7 +45,8 @@ public function setFloatValues(bool $enable = true) : Calculator
 ```php
 public function getValues() : array<string,int|float>
 // Returns column names mapped to their calculated widths.
-// Triggers lazy calculation on first call.
+// Triggers lazy calculation on first call; subsequent calls return the cached result (idempotent).
+// @throws \DivisionByZeroError if the calculator was created with an empty column array.
 
 public function getPixelValues(int $targetWidth) : array<string,int>
 // Converts percentage values to absolute pixel widths summing to $targetWidth.

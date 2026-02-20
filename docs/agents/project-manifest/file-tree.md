@@ -35,6 +35,8 @@ column-widths-calculator/
 │   │   └── classes/
 │   │       └── CalculatorTestCase.php  # Base test case with shared helpers
 │   └── testsuites/
+│       ├── ConfigurationTests.php  # Tests for fluent configuration methods (setFloatValues, setMaxTotal, setMinWidth) and query methods (isIntegerMode, getDefaultOptions)
+│       ├── EdgeCaseTests.php       # Edge-case tests (empty input, negative values, idempotency, numeric keys, stress)
 │       ├── FloatValueTests.php     # Tests for float output mode
 │       ├── GetValueTests.php       # Tests for the main getValues() output
 │       ├── MinWidthTests.php       # Tests for minimum-width enforcement

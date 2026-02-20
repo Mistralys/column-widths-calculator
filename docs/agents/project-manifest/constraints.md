@@ -11,7 +11,12 @@
 
 ## Calculation Lifecycle
 
-- **Lazy, single-pass calculation.** `calculate()` is guarded by a `$calculated` boolean flag. It runs exactly once, on the first call to `getValues()`. Subsequent calls return cached column values. Do not add code that modifies `Column` values after `getValues()` has been called.
+- **Lazy, single-pass calculation.** `calculate()` is guarded by a `$calculated` boolean flag. It runs exactly once, on the first call to `getValues()`. Subsequent calls return cached column values (idempotent). Do not add code that modifies `Column` values after `getValues()` has been called.
+
+## Input Edge Cases
+
+- **Negative values treated as missing.** Any column whose initial value is `<= 0` (including negative numbers) is flagged as *missing* by `Column::isMissing()` and receives a filled width during the `MissingFiller` pass. Callers should not rely on negative values being preserved.
+- **Empty column array causes `DivisionByZeroError`.** `Calculator::create([])` succeeds, but calling `getValues()` on an empty-column calculator throws `\DivisionByZeroError` inside `Operations::countColumns()` because the pipeline divides by column count. There is currently no user-friendly guard — ensure at least one column is supplied.
 
 ## Option Defaults
 
@@ -28,7 +33,11 @@
 ## Output Modes
 
 - **Integer mode (default):** all values are floored via `intval(floor(...))` before the leftover-filling step. The `LeftoverFiller` then corrects rounding gaps to ensure the total is exact.
-- **Float mode:** no rounding is applied. The caller is responsible for any rounding they require.
+- **Float mode:** no rounding is applied. The caller is responsible for any rounding they require. When `OverflowFixer` runs in float mode, adjusted values are assigned as floats (the `floor()` call is still applied, so overflow redistribution may yield whole-number floats such as `50.0` rather than fractional values like `50.5`).
+
+## Recursion Safety
+
+- `SurplusRemover::remove()` recurses until surplus is fully absorbed. A private `$depth` counter caps the recursion at **100 iterations** to prevent a stack overflow in degenerate configurations where all columns are at `minWidth` and cannot absorb surplus. In normal operation, convergence happens in 1–3 passes. The counter is scoped to the `SurplusRemover` instance, which is created fresh per `Calculator` instance.
 
 ## Internal vs. Public Classes
 
@@ -51,4 +60,19 @@
 ## Testing
 
 - Tests extend `CalculatorTestCase` (located in `tests/assets/classes/`), which itself extends the PHPUnit base test case.
-- Test suites are organised by feature area (`FloatValueTests`, `GetValueTests`, `MinWidthTests`, `PixelValueTests`).
+- Test suites are organised by feature area (`ConfigurationTests`, `EdgeCaseTests`, `FloatValueTests`, `GetValueTests`, `MinWidthTests`, `PixelValueTests`).
+
+### Shared Assertion Helpers (CalculatorTestCase)
+
+Two protected helpers are available to all test cases:
+
+| Method | Signature | Purpose |
+|---|---|---|
+| `assertTotalEquals()` | `assertTotalEquals(int\|float $expected, array $values): void` | Asserts that `array_sum($values) === $expected`. Uses `assertSame` so `100` (int) and `100.0` (float) are treated as distinct. |
+| `assertCalculation()` | `assertCalculation(array $input, array $expectedOutput, int\|float\|null $maxTotal = null, int\|float\|null $minWidth = null, bool $floatMode = false): void` | Creates a `Calculator` from `$input`, applies any optional configuration, calls `getValues()`, and asserts both the output map and the total sum. |
+
+> **Note:** When passing a `$minWidth` argument to `assertCalculation()`, ensure the value satisfies `$minWidth <= getMaxMinWidth()`. The helper does not pre-validate this; an invalid value will surface as a `Calculator::ERROR_INVALID_MIN_WIDTH` (61501) exception from inside the helper.
+
+### Data Provider Convention
+
+Multi-scenario tests use the PHPUnit 13 `#[DataProvider('methodName')]` attribute (not the deprecated `@dataProvider` annotation). Provider methods must be `public static`, return a keyed array of scenario arrays, and use **descriptive string keys** so each case appears with a human-readable label in the PHPUnit output.
