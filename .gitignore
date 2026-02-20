@@ -4,3 +4,4 @@ vendor/
 docs/config/cache/nette.configurator
 docs/config/cache/PHPStan
 docs/config/resultCache.php
+.idea/copilot.data.migration.ask2agent.xml
