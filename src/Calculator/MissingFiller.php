@@ -65,6 +65,13 @@ class MissingFiller
             $toDistribute = $this->calculator->getMinWidth() * $this->missing;
         }
         
-        return $toDistribute / $this->missing;
+        $perColumn = $toDistribute / $this->missing;
+
+        if(!$this->calculator->isIntegerMode())
+        {
+            $perColumn = round($perColumn, 10);
+        }
+
+        return $perColumn;
     }
 }

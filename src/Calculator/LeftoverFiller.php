@@ -57,6 +57,11 @@ class LeftoverFiller
             $col = $this->columns[$i];
             
             $val = $col->getValue() + $perCol;
+
+            if(!$this->calculator->isIntegerMode())
+            {
+                $val = round($val, 10);
+            }
             
             $col->setValue($val);
         }
