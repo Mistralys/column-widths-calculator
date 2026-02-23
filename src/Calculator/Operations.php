@@ -1,4 +1,5 @@
 <?php
+
 /**
  * File containing the {@see Mistralys\WidthsCalculator\Calculator\Operations} class.
  *
@@ -23,60 +24,55 @@ class Operations
 {
     private int $amountCols;
     private int $missing = 0;
-    
-   /**
-    * @var Column[]
-    */
+
+    /**
+     * @var Column[]
+     */
     private array $columns;
-    
+
     public function __construct(Calculator $calculator)
     {
         $this->columns = $calculator->getColumns();
         $this->amountCols = count($this->columns);
-        
-        foreach($this->columns as $col)
-        {
-            if($col->isMissing())
-            {
+
+        foreach ($this->columns as $col) {
+            if ($col->isMissing()) {
                 $this->missing++;
             }
         }
     }
 
-    public function calcTotal() : float
+    public function calcTotal(): float
     {
         $total = 0;
-        
-        foreach($this->columns as $col)
-        {
+
+        foreach ($this->columns as $col) {
             $total += $col->getValue();
         }
-        
+
         return $total;
     }
-    
-    public function countColumns() : int
+
+    public function countColumns(): int
     {
         return $this->amountCols;
     }
-    
-    public function countMissing() : int
+
+    public function countMissing(): int
     {
         return $this->missing;
     }
-    
-    public function calcTotalNotMissing() : float
+
+    public function calcTotalNotMissing(): float
     {
         $total = 0;
-        
-        foreach($this->columns as $col)
-        {
-            if(!$col->isMissing())
-            {
+
+        foreach ($this->columns as $col) {
+            if (!$col->isMissing()) {
                 $total += $col->getValue();
             }
         }
-        
+
         return $total;
     }
 }

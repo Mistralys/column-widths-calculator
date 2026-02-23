@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mistralys\WidthsCalculatorUnitTests;
@@ -18,6 +19,18 @@ class EdgeCaseTests extends CalculatorTestCase
 
         $this->assertEquals(100, array_sum(array_values($result)));
         $this->assertGreaterThan(0, $result['A']); // negative treated as missing → gets positive width
+    }
+
+    /**
+     * H3b — setMinWidth() on an empty column array must throw \InvalidArgumentException
+     * with code Calculator::ERROR_EMPTY_COLUMN_ARRAY (61502).
+     */
+    public function testSetMinWidthOnEmptyArrayThrows(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionCode(Calculator::ERROR_EMPTY_COLUMN_ARRAY);
+
+        Calculator::create([])->setMinWidth(5);
     }
 
     /**

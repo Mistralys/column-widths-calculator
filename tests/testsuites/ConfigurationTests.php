@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mistralys\WidthsCalculatorUnitTests;
@@ -31,7 +32,7 @@ class ConfigurationTests extends CalculatorTestCase
     {
         $expected = [
             'maxTotal'      => 100,
-            'minPerCol'     => 1,
+            'minPerCol'     => 1.0,
             'integerValues' => true,
         ];
 

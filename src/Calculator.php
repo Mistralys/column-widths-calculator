@@ -1,4 +1,5 @@
 <?php
+
 /**
  * File containing the {@see Mistralys\WidthsCalculator\Calculator} class.
  *
@@ -24,7 +25,7 @@ use Mistralys\WidthsCalculator\Calculator\LeftoverFiller;
  * column names with user width values.
  *
  * Columns with 0 width are filled automatically with
- * the leftover percent. Values out of bounds are 
+ * the leftover percent. Values out of bounds are
  * normalized proportionally, allowing the use of an
  * arbitrary numbering system to convert to percent.
  *
@@ -33,182 +34,186 @@ use Mistralys\WidthsCalculator\Calculator\LeftoverFiller;
  */
 class Calculator implements Interface_Optionable
 {
+    use Traits_Optionable;
     public const ERROR_INVALID_MIN_WIDTH = 61501;
     public const ERROR_EMPTY_COLUMN_ARRAY = 61502;
-    
-    use Traits_Optionable;
-    
-   /**
-    * @var Column[]
-    */
+
+    /**
+     * @var Column[]
+     */
     private $columns = array();
-    
-   /**
-    * @var boolean
-    */
+
+    /**
+     * @var boolean
+     */
     private $calculated = false;
-    
-   /**
-    * @var Operations
-    */
+
+    /**
+     * @var Operations
+     */
     private $operations;
-    
-   /**
-    * @param array<string,float> $columnValues
-    */
+
+    /**
+     * @param array<string,float> $columnValues
+     */
     private function __construct(array $columnValues)
     {
-        foreach($columnValues as $name => $value)
-        {
+        foreach ($columnValues as $name => $value) {
             $this->addColumn(
-                (string)$name, 
+                (string)$name,
                 floatval($value)
             );
         }
-        
+
         $this->operations = new Operations($this);
     }
-    
-   /**
-    * Creates an instance of the calculator.
-    * 
-    * @param array<string,float> $columnValues
-    * @return Calculator
-    */
-    public static function create(array $columnValues) : Calculator
+
+    /**
+     * Creates an instance of the calculator.
+     *
+     * @param array<string,float> $columnValues
+     * @return Calculator
+     */
+    public static function create(array $columnValues): Calculator
     {
         return new Calculator($columnValues);
     }
-    
-   /**
-    * @return array<string,mixed>
-    */
+
+    /**
+     * @return array<string,mixed>
+     */
     public function getDefaultOptions(): array
     {
         return array(
             'maxTotal' => 100,
-            'minPerCol' => 1,
+            'minPerCol' => 1.0,
             'integerValues' => true
         );
     }
-    
-    public function getMaxTotal() : float
+
+    public function getMaxTotal(): float
     {
         $value = $this->getOption('maxTotal');
         return is_numeric($value) ? (float)$value : 0.0;
     }
-    
-    public function setMaxTotal(float $total) : Calculator
+
+    public function setMaxTotal(float $total): Calculator
     {
         $this->setOption('maxTotal', $total);
         return $this;
     }
-    
-    public function getOperations() : Operations
+
+    public function getOperations(): Operations
     {
         return $this->operations;
     }
-    
-    public function setFloatValues(bool $enable=true) : Calculator
+
+    public function setFloatValues(bool $enable = true): Calculator
     {
         $this->setOption('integerValues', !$enable);
         return $this;
     }
-    
-   /**
-    * Sets the minimum width to enforce for columns, 
-    * when there already are other columns that take
-    * up all the available width.
-    * 
-    * @param float $width
-    * @return Calculator
-    */
-    public function setMinWidth(float $width) : Calculator
+
+    /**
+     * Sets the minimum width to enforce for columns,
+     * when there already are other columns that take
+     * up all the available width.
+     *
+     * @param float $width
+     * @return Calculator
+     */
+    public function setMinWidth(float $width): Calculator
     {
+        if ($this->operations->countColumns() === 0) {
+            throw new \InvalidArgumentException(
+                'Cannot set minimum width on an empty column array.',
+                self::ERROR_EMPTY_COLUMN_ARRAY
+            );
+        }
+
         $max = $this->getMaxMinWidth();
-        
-        if($width > $max)
-        {
-            throw new \Exception(
+
+        if ($width > $max) {
+            throw new \InvalidArgumentException(
                 sprintf('Minimum width cannot be set above %s.', number_format($max, 4)),
                 self::ERROR_INVALID_MIN_WIDTH
             );
         }
-        
+
         $this->setOption('minPerCol', $width);
         return $this;
     }
-    
-    public function getMaxMinWidth() : float
+
+    public function getMaxMinWidth(): float
     {
+        if ($this->operations->countColumns() === 0) {
+            return 0.0;
+        }
+
         return $this->getMaxTotal() / $this->operations->countColumns();
     }
-    
-    private function addColumn(string $name, float $value) : void
+
+    private function addColumn(string $name, float $value): void
     {
         $col = new Column(
             $name,
             $value
         );
-        
+
         $this->columns[] = $col;
     }
-    
-   /**
-    * Retrieves the minimum width for columns, in percent.
-    * @return float
-    */
-    public function getMinWidth() : float
+
+    /**
+     * Retrieves the minimum width for columns, in percent.
+     * @return float
+     */
+    public function getMinWidth(): float
     {
         $value = $this->getOption('minPerCol');
         return is_numeric($value) ? (float)$value : 0.0;
     }
-    
-    private function calculate() : void
+
+    private function calculate(): void
     {
-        if($this->calculated)
-        {
+        if ($this->calculated) {
             return;
         }
-        
-        if($this->operations->calcTotal() > $this->getMaxTotal())
-        {
+
+        if ($this->operations->calcTotal() > $this->getMaxTotal()) {
             $this->fixOverflow();
         }
-        
+
         $this->fillMissing();
         $this->removeSurplus();
         $this->convertToInteger();
         $this->fillLeftover();
-        
+
         $this->calculated = true;
     }
-    
-   /**
-    * Adjusts the individual column values to match
-    * the expected output format, for example ensuring
-    * integer values if we are in integer mode.
-    */
-    private function convertToInteger() : void
+
+    /**
+     * Adjusts the individual column values to match
+     * the expected output format, for example ensuring
+     * integer values if we are in integer mode.
+     */
+    private function convertToInteger(): void
     {
         // convert all columns to integer values as required
-        if($this->isIntegerMode())
-        {
-            foreach($this->columns as $col)
-            {
+        if ($this->isIntegerMode()) {
+            foreach ($this->columns as $col) {
                 $val = intval(floor($col->getValue()));
                 $col->setValue(floatval($val));
             }
         }
     }
-    
-   /**
-    * Retrieves the updated list of column values, 
-    * retaining the original keys.
-    * 
-    * @return array<string,int|float>
-    */
-    public function getValues() : array
+
+    /**
+     * Retrieves the updated list of column values,
+     * retaining the original keys.
+     *
+     * @return array<string,int|float>
+     */
+    public function getValues(): array
     {
         if ($this->operations->countColumns() === 0) {
             throw new \InvalidArgumentException(
@@ -218,84 +223,81 @@ class Calculator implements Interface_Optionable
         }
 
         $this->calculate();
-        
+
         $result = array();
-        
-        foreach($this->columns as $col)
-        {
+
+        foreach ($this->columns as $col) {
             $val = $col->getValue();
-            
-            if($this->isIntegerMode())
-            {
+
+            if ($this->isIntegerMode()) {
                 $val = intval($val);
             }
-            
+
             $result[$col->getName()] = $val;
         }
-        
+
         return $result;
     }
-    
-    public function isIntegerMode() : bool
+
+    public function isIntegerMode(): bool
     {
         return $this->getBoolOption('integerValues');
     }
-    
-   /**
-    * Retrieves the column values as pixel values, based on
-    * the target available pixel width.
-    * 
-    * @param int $targetWidth
-    * @return array<string,int>
-    */
-    public function getPixelValues(int $targetWidth) : array
+
+    /**
+     * Retrieves the column values as pixel values, based on
+     * the target available pixel width.
+     *
+     * @param int $targetWidth
+     * @return array<string,int>
+     */
+    public function getPixelValues(int $targetWidth): array
     {
         $calc = self::create($this->getValues());
         $calc->setMaxTotal($targetWidth);
         $values = $calc->getValues();
 
         $result = array();
-        foreach($values as $name => $value)
-        {
+        foreach ($values as $name => $value) {
             $result[$name] = (int)$value;
         }
-        
+
         return $result;
     }
-    
-   /**
-    * @return Column[]
-    */
-    public function getColumns() : array 
+
+    /**
+     * @return Column[]
+     */
+    public function getColumns(): array
     {
         return $this->columns;
     }
-    
-    private function removeSurplus() : void
+
+    private function removeSurplus(): void
     {
         $surplus = new SurplusRemover($this);
         $surplus->remove();
     }
-    
-   /**
-    * Detects any leftover percentages that still need
-    * to be filled, in case we are not at 100% yet. It
-    * distributes the missing percentages evenly over the
-    * available columns, from the last one upwards.
-    */
-    private function fillLeftover() : void
+
+    /**
+     * Detects any leftover percentages that still need
+     * to be filled, in case we are not at 100% yet. It
+     * distributes the missing percentages evenly over the
+     * available columns, from the last one upwards.
+     */
+    private function fillLeftover(): void
     {
         $filler = new LeftoverFiller($this);
         $filler->fill();
     }
-    
-    private function fillMissing() : void
+
+    private function fillMissing(): void
     {
         $filling = new MissingFiller($this);
         $filling->fill();
     }
-    
-    private function fixOverflow() : void
+
+    private function fixOverflow(): void
     {
         $overflow = new OverflowFixer($this);
         $overflow->fix();

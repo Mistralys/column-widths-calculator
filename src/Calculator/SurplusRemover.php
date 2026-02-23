@@ -1,4 +1,5 @@
 <?php
+
 /**
  * File containing the {@see Mistralys\WidthsCalculator\Calculator\SurplusRemover} class.
  *
@@ -6,7 +7,7 @@
  * @see Mistralys\WidthsCalculator\Calculator\SurplusRemover
  */
 
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace Mistralys\WidthsCalculator\Calculator;
 
@@ -22,85 +23,80 @@ use Mistralys\WidthsCalculator\Calculator;
  */
 class SurplusRemover
 {
+    private const MAX_RECURSION_DEPTH = 100;
+
     private Calculator $calculator;
     private Operations $operations;
     private float $leftover = 0;
     private float $baseTotal = 0;
-    
+
     public function __construct(Calculator $calculator)
     {
         $this->calculator = $calculator;
         $this->operations = $calculator->getOperations();
     }
-    
-    public function remove() : void
+
+    public function remove(): void
     {
         $this->doRemove(0);
     }
 
-    private function doRemove(int $depth) : void
+    private function doRemove(int $depth): void
     {
-        if ($depth > 100) {
+        if ($depth > self::MAX_RECURSION_DEPTH) {
             return;
         }
 
         $this->leftover = $this->calculator->getMaxTotal() - $this->operations->calcTotal();
-        
-        if($this->leftover >= 0)
-        {
+
+        if ($this->leftover >= 0) {
             return;
         }
-        
+
         $this->leftover *= -1; // we want a positive number
         $this->baseTotal = $this->operations->calcTotalNotMissing();
         $cols = $this->calculator->getColumns();
-        
-        foreach($cols as $col)
-        {
-            if(!$this->processColumn($col))
-            {
+
+        foreach ($cols as $col) {
+            if (!$this->processColumn($col)) {
                 break;
             }
         }
-        
+
         // There is some surplus left after the operation:
-        // this means there were columns from which the 
+        // this means there were columns from which the
         // surplus could not be removed because of the min
-        // column width. 
+        // column width.
         //
-        // We simply run the removal again, to remove the 
+        // We simply run the removal again, to remove the
         // surplus from the columns it can be removed from.
-        if($this->leftover > 0)
-        {
+        if ($this->leftover > 0) {
             $this->doRemove($depth + 1);
         }
     }
-    
-    private function processColumn(Column $col) : bool
+
+    private function processColumn(Column $col): bool
     {
-        if($col->isMissing())
-        {
+        if ($col->isMissing()) {
             return true;
         }
-        
-        if($this->leftover <= 0)
-        {
+
+        if ($this->leftover <= 0) {
             return false;
         }
-        
+
         $percent = $col->getValue() * 100 / $this->baseTotal;
         $amount = round($this->leftover * $percent / 100);
         $val = $col->getValue() - $amount;
-        
-        if($val < $this->calculator->getMinWidth())
-        {
+
+        if ($val < $this->calculator->getMinWidth()) {
             return true;
         }
-        
+
         $this->leftover -= $amount;
-        
+
         $col->setValue($val);
-        
+
         return true;
     }
 }

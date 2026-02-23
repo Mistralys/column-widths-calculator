@@ -1,4 +1,5 @@
 <?php
+
 /**
  * File containing the {@see Mistralys\WidthsCalculator\Calculator\Column} class.
  *
@@ -21,35 +22,35 @@ class Column
     private string $name;
     private float $value;
     private bool $missing;
-    
+
     public function __construct(string $name, float $value)
     {
         $this->name = $name;
         $this->value = $value;
         $this->missing = $value <= 0;
     }
-    
-    public function getName() : string
+
+    public function getName(): string
     {
         return $this->name;
     }
-    
-    public function isMissing() : bool
+
+    public function isMissing(): bool
     {
         return $this->missing;
     }
-    
-    public function getValue() : float
+
+    public function getValue(): float
     {
         return $this->value;
     }
-    
-    public function setValue(float $value) : void
+
+    public function setValue(float $value): void
     {
         $this->value = $value;
     }
-    
-    public function makeMissing() : void
+
+    public function makeMissing(): void
     {
         $this->missing = true;
     }
