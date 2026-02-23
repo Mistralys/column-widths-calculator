@@ -1,4 +1,5 @@
 .phpunit.result.cache
+.php-cs-fixer.cache
 docs/phpstan/output.txt
 vendor/
 docs/config/cache/nette.configurator
