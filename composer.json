@@ -37,8 +37,8 @@
         "phpstan/phpstan" : ">=2.1.39"
 	},
     "scripts": {
-        "analyze": "php vendor/bin/phpstan analyse --memory-limit=900M",
-        "analyze-save": "php vendor/bin/phpstan analyse --memory-limit=900M > phpstan-result.txt || true",
+        "analyze": "php vendor/bin/phpstan analyse --configuration docs/config/phpstan.neon --memory-limit=900M",
+        "analyze-save": "php vendor/bin/phpstan analyse --configuration docs/config/phpstan.neon --memory-limit=900M > phpstan-result.txt || true",
         "analyze-clear": "php vendor/bin/phpstan clear-result-cache",
         "test": "php vendor/bin/phpunit",
         "test-file": "php vendor/bin/phpunit --no-progress",
