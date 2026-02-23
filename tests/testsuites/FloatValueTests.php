@@ -69,6 +69,6 @@ class FloatValueTests extends CalculatorTestCase
         $calc->setFloatValues();
         $result = $calc->getValues();
 
-        $this->assertEqualsWithDelta(100.0, array_sum(array_values($result)), 0.001);
+        $this->assertTotalEquals(100.0, $result, 0.001);
     }
 }

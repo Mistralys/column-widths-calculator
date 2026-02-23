@@ -1,10 +1,8 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Mistralys\WidthsCalculatorUnitTests;
 
-use DivisionByZeroError;
 use Mistralys\WidthsCalculator\Calculator;
 
 class EdgeCaseTests extends CalculatorTestCase
@@ -23,18 +21,16 @@ class EdgeCaseTests extends CalculatorTestCase
     }
 
     /**
-     * H3 — Empty input triggers a DivisionByZeroError inside getValues()
-     * because Operations::countColumns() returns 0 and the normalisation step
-     * divides by it. setMinWidth() must NOT be called on an empty Calculator,
-     * as that also triggers a division-by-zero via getMaxMinWidth().
+     * H3 — Empty input must throw \InvalidArgumentException with code
+     * Calculator::ERROR_EMPTY_COLUMN_ARRAY (61502) before any calculation
+     * pipeline is invoked.
      */
-    public function test_emptyInput(): void
+    public function test_emptyColumnArray_throwsInvalidArgumentException(): void
     {
-        $calc = Calculator::create([]);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionCode(Calculator::ERROR_EMPTY_COLUMN_ARRAY);
 
-        $this->expectException(DivisionByZeroError::class);
-
-        $calc->getValues();
+        Calculator::create([])->getValues();
     }
 
     /**
@@ -47,7 +43,7 @@ class EdgeCaseTests extends CalculatorTestCase
         $first  = $calc->getValues();
         $second = $calc->getValues();
 
-        $this->assertSame($first, $second); // strict identity: same array reference or equal values
+        $this->assertSame($first, $second); // strict type+value equality on every element — arrays are value types in PHP
     }
 
     /**

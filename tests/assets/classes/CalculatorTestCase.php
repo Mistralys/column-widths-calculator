@@ -9,11 +9,23 @@ use PHPUnit\Framework\TestCase;
 
 abstract class CalculatorTestCase extends TestCase
 {
-    protected function assertTotalEquals(int|float $expected, array $values): void
+    /**
+     * @param array<array-key, int|float> $values
+     */
+    protected function assertTotalEquals(int|float $expected, array $values, ?float $delta = null): void
     {
-        $this->assertSame($expected, array_sum(array_values($values)));
+        $actual = array_sum(array_values($values));
+        if ($delta !== null) {
+            $this->assertEqualsWithDelta($expected, $actual, $delta);
+        } else {
+            $this->assertSame($expected, $actual);
+        }
     }
 
+    /**
+     * @param array<array-key, float> $input
+     * @param array<string, int|float> $expectedOutput
+     */
     protected function assertCalculation(
         array $input,
         array $expectedOutput,

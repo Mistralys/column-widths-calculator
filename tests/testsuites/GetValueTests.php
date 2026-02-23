@@ -8,6 +8,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 class GetValueTests extends CalculatorTestCase
 {
+    /**
+     * @return array<string, array{array<string, float>, array<string, int>}>
+     */
     public static function provideGetValuesCases(): array
     {
         return [
@@ -71,6 +74,10 @@ class GetValueTests extends CalculatorTestCase
         ];
     }
 
+    /**
+     * @param array<string, float> $input
+     * @param array<string, int> $expected
+     */
     #[DataProvider('provideGetValuesCases')]
     public function test_getValues(array $input, array $expected): void
     {

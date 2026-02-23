@@ -34,6 +34,7 @@ use Mistralys\WidthsCalculator\Calculator\LeftoverFiller;
 class Calculator implements Interface_Optionable
 {
     public const ERROR_INVALID_MIN_WIDTH = 61501;
+    public const ERROR_EMPTY_COLUMN_ARRAY = 61502;
     
     use Traits_Optionable;
     
@@ -93,7 +94,8 @@ class Calculator implements Interface_Optionable
     
     public function getMaxTotal() : float
     {
-        return floatval($this->getOption('maxTotal'));
+        $value = $this->getOption('maxTotal');
+        return is_numeric($value) ? (float)$value : 0.0;
     }
     
     public function setMaxTotal(float $total) : Calculator
@@ -158,7 +160,8 @@ class Calculator implements Interface_Optionable
     */
     public function getMinWidth() : float
     {
-        return floatval($this->getOption('minPerCol'));
+        $value = $this->getOption('minPerCol');
+        return is_numeric($value) ? (float)$value : 0.0;
     }
     
     private function calculate() : void
@@ -207,6 +210,13 @@ class Calculator implements Interface_Optionable
     */
     public function getValues() : array
     {
+        if ($this->operations->countColumns() === 0) {
+            throw new \InvalidArgumentException(
+                'Cannot calculate widths for an empty column array.',
+                self::ERROR_EMPTY_COLUMN_ARRAY
+            );
+        }
+
         $this->calculate();
         
         $result = array();
