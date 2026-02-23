@@ -28,7 +28,9 @@
 
 ## Minimum Width Validation
 
-- `setMinWidth(float $width)` throws `\Exception` with code `Calculator::ERROR_INVALID_MIN_WIDTH` (`61501`) when `$width > getMaxTotal() / columnCount`. This prevents a configuration where the sum of minimum widths would already exceed `maxTotal`.
+- `setMinWidth(float $width)` throws `\InvalidArgumentException` with code `Calculator::ERROR_EMPTY_COLUMN_ARRAY` (`61502`) when called on a calculator with an empty column array (i.e., created with `Calculator::create([])`). This guard fires before the width comparison and prevents a `DivisionByZeroError` in `getMaxMinWidth()`.
+- `setMinWidth(float $width)` throws `\InvalidArgumentException` with code `Calculator::ERROR_INVALID_MIN_WIDTH` (`61501`) when `$width > getMaxTotal() / columnCount`. This prevents a configuration where the sum of minimum widths would already exceed `maxTotal`.
+- `getMaxMinWidth()` returns `0.0` when the column array is empty (no division is attempted).
 
 ## Output Modes
 
@@ -62,6 +64,17 @@
 - Root namespace: `Mistralys\WidthsCalculator`
 - Internal workers namespace: `Mistralys\WidthsCalculator\Calculator`
 - Test classes namespace: `Mistralys\WidthsCalculatorUnitTests`
+
+## Code Style
+
+- **Tool:** `friendsofphp/php-cs-fixer` (`^3.94`)
+- **Configuration file:** `.php-cs-fixer.php` (tracked in version control; do **not** add to `.gitignore`).
+- **Base rule set:** `@PSR12` with the following overrides:
+  - `braces_position` → functions and classes use Allman-style opening brace (`next_line_unless_newline_at_signature_end`); control structures use same-line (`same_line`).
+  - `no_spaces_after_function_name` → enabled.
+- **Apply fixes:** `composer cs-fix`
+- **Dry-run check:** `composer cs-check` (exits with code 0 when no changes are needed)
+- The dry-run must report **0 changes** on any committed code. Run `composer cs-check` before marking a WP complete.
 
 ## Static Analysis
 

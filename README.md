@@ -135,7 +135,10 @@ Col2 = 20
 Col3 = 20
 ```
  
-NOTE: The maximum possible value for the minimum size depends on the amount of columns. Trying to set the minimum size to 40% for 3 columns for example, will throw an exception (40 x 3 is bigger than 100).
+NOTE: The maximum possible value for the minimum size depends on the amount of columns. Trying to set the minimum size to 40% for 3 columns for example, will throw `\InvalidArgumentException` with code `Calculator::ERROR_INVALID_MIN_WIDTH` (61501), because 40 × 3 exceeds 100. Use `getMaxMinWidth()` to query the safe upper bound before calling `setMinWidth()`.
+
+NOTE: Calling `setMinWidth()` on a `Calculator` created with an empty column array (`Calculator::create([])`) throws `\InvalidArgumentException` with code `Calculator::ERROR_EMPTY_COLUMN_ARRAY` (61502). Use `getMaxMinWidth()` to query the maximum safe value before calling `setMinWidth()` — it returns `0.0` on an empty array.
+
 
 
 ## Arbitrary numbering
@@ -209,12 +212,22 @@ $result = $calc->getValues();
 
 ### Empty column array
 
-Passing an empty array to `Calculator::create([])` does not throw immediately. However, calling `getValues()` on an empty-array calculator will throw an `\InvalidArgumentException` with the error code `Calculator::ERROR_EMPTY_COLUMN_ARRAY` (61502):
+Passing an empty array to `Calculator::create([])` does not throw immediately. However, several methods throw `\InvalidArgumentException` with code `Calculator::ERROR_EMPTY_COLUMN_ARRAY` (61502) when called on a calculator with no columns:
+
+- `getValues()` — guard fires at the top of the calculation pipeline.
+- `setMinWidth(float $width)` — guard fires before the internal width-limit check, preventing a `DivisionByZeroError`.
 
 ```php
-// Will throw \InvalidArgumentException (code 61502):
+// Both will throw \InvalidArgumentException (code 61502):
 $calc = Calculator::create([]);
-$result = $calc->getValues();
+$calc->setMinWidth(5);    // throws
+$calc->getValues();       // throws
+```
+
+`getMaxMinWidth()` is safe to call on an empty-array calculator — it returns `0.0` without performing any division:
+
+```php
+$max = Calculator::create([])->getMaxMinWidth(); // 0.0, no exception
 ```
 
 To handle this defensively:
@@ -229,7 +242,7 @@ try {
 }
 ```
 
-Always ensure at least one column is present before calling `getValues()`.
+Always ensure at least one column is present before calling `setMinWidth()` or `getValues()`.
 
 ---
 
@@ -309,3 +322,21 @@ To clear the PHPStan result cache:
 ```
 composer analyze-clear
 ```
+
+### Code style
+
+The project uses [PHP-CS-Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer) for automated code style enforcement, configured via `.php-cs-fixer.php`. The ruleset is [PSR-12](https://www.php-fig.org/psr/psr-12/) with Allman-style braces for function and OOP constructs (class, method, anonymous function declaration bodies).
+
+Check whether any files need reformatting (dry-run, no changes written):
+
+```
+composer cs-check
+```
+
+Apply automatic fixes:
+
+```
+composer cs-fix
+```
+
+> **Note:** PHP-CS-Fixer may emit a non-fatal version-mismatch warning when the runtime PHP version differs from the project target (8.4). This does not affect correctness; the exit code remains 0. The generated cache file (`.php-cs-fixer.cache`) is excluded from version control via `.gitignore`.

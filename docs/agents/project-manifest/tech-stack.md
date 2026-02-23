@@ -28,6 +28,7 @@
 |---|---|---|
 | `phpunit/phpunit` | `>=13.0.5` | Unit testing framework. |
 | `phpstan/phpstan` | `>=2.1.9` | Static analysis. |
+| `friendsofphp/php-cs-fixer` | `^3.94` | Automated code-style enforcement (PSR-12 + Allman braces for functions/classes). |
 
 ## Architectural Patterns
 

@@ -32,10 +32,12 @@ public function setMaxTotal(float $total) : Calculator
 
 public function getMinWidth() : float
 public function setMinWidth(float $width) : Calculator
-// Throws \Exception(ERROR_INVALID_MIN_WIDTH) if $width > getMaxMinWidth()
+// Throws \InvalidArgumentException(ERROR_EMPTY_COLUMN_ARRAY) if column array is empty
+// Throws \InvalidArgumentException(ERROR_INVALID_MIN_WIDTH) if $width > getMaxMinWidth()
 
 public function getMaxMinWidth() : float
 // Returns: getMaxTotal() / column count
+// Returns 0.0 if the column array is empty (no division attempted)
 
 public function isIntegerMode() : bool
 public function setFloatValues(bool $enable = true) : Calculator
