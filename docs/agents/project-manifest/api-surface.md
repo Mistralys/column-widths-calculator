@@ -12,6 +12,7 @@ The sole public entry point for consumers. Implements `AppUtils\Interface_Option
 
 ```php
 public const ERROR_INVALID_MIN_WIDTH = 61501;
+public const ERROR_EMPTY_COLUMN_ARRAY = 61502;
 ```
 
 ### Factory
@@ -46,7 +47,7 @@ public function setFloatValues(bool $enable = true) : Calculator
 public function getValues() : array<string,int|float>
 // Returns column names mapped to their calculated widths.
 // Triggers lazy calculation on first call; subsequent calls return the cached result (idempotent).
-// @throws \DivisionByZeroError if the calculator was created with an empty column array.
+// @throws \InvalidArgumentException with code ERROR_EMPTY_COLUMN_ARRAY (61502) if created with an empty column array.
 
 public function getPixelValues(int $targetWidth) : array<string,int>
 // Converts percentage values to absolute pixel widths summing to $targetWidth.

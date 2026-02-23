@@ -209,12 +209,24 @@ $result = $calc->getValues();
 
 ### Empty column array
 
-Passing an empty array to `Calculator::create([])` does not throw immediately. However, calling `getValues()` on an empty-array calculator will throw a `\DivisionByZeroError` because the internal pipeline divides by the number of columns:
+Passing an empty array to `Calculator::create([])` does not throw immediately. However, calling `getValues()` on an empty-array calculator will throw an `\InvalidArgumentException` with the error code `Calculator::ERROR_EMPTY_COLUMN_ARRAY` (61502):
 
 ```php
-// Will throw \DivisionByZeroError:
+// Will throw \InvalidArgumentException (code 61502):
 $calc = Calculator::create([]);
 $result = $calc->getValues();
+```
+
+To handle this defensively:
+
+```php
+try {
+    $result = Calculator::create([])->getValues();
+} catch (\InvalidArgumentException $e) {
+    if ($e->getCode() === Calculator::ERROR_EMPTY_COLUMN_ARRAY) {
+        // No columns were provided
+    }
+}
 ```
 
 Always ensure at least one column is present before calling `getValues()`.
@@ -247,4 +259,53 @@ Col2 = 207
 Col3 = 186
 
 = 600
+```
+
+---
+
+## Development
+
+### Running the test suite
+
+```
+composer test
+```
+
+Additional convenience aliases:
+
+| Command | Purpose |
+|---|---|
+| `composer test` | Run the full PHPUnit test suite |
+| `composer test-suite <name>` | Run a specific PHPUnit test suite by name |
+| `composer test-filter <pattern>` | Run tests matching a name pattern |
+| `composer test-group <group>` | Run tests belonging to a PHPUnit group |
+
+### Static analysis
+
+The project uses [PHPStan](https://phpstan.org/) at **level 9** (maximum strictness), configured via `docs/config/phpstan.neon`.
+
+Run the analyser:
+
+```
+composer analyze
+```
+
+Or directly:
+
+```
+vendor/bin/phpstan analyse --configuration docs/config/phpstan.neon
+```
+
+To save the analysis report to `phpstan-result.txt` locally:
+
+```
+composer analyze-save
+```
+
+> **Note:** `analyze-save` suppresses the non-zero exit code (`|| true`) so that the report file is always written. This alias is **not suitable for CI pipelines** — use `composer analyze` there instead.
+
+To clear the PHPStan result cache:
+
+```
+composer analyze-clear
 ```

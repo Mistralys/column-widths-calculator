@@ -35,10 +35,10 @@ Calculator::create(['A' => 40, 'B' => 0])
               │     minWidth), proportionally reduces non-missing
               │     columns (respecting minWidth). Runs recursively
               │     until surplus is fully absorbed.
-              │     Safety: recursion is capped at 100 iterations
-              │     via a private $depth counter (resets on new
-              │     Calculator instance). In normal operation,
-              │     convergence occurs in 1–3 passes.
+              │     Entry point calls doRemove(0); each recursive
+              │     call uses doRemove($depth + 1). Guard fires at
+              │     $depth > 100 (no instance $depth property).
+              │     In normal operation, convergence in 1–3 passes.
               ├─ convertToInteger()
               └─ LeftoverFiller::fill()   Fill any rounding gap
                     └─► returns array<string, int|float>

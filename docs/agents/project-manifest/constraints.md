@@ -16,7 +16,7 @@
 ## Input Edge Cases
 
 - **Negative values treated as missing.** Any column whose initial value is `<= 0` (including negative numbers) is flagged as *missing* by `Column::isMissing()` and receives a filled width during the `MissingFiller` pass. Callers should not rely on negative values being preserved.
-- **Empty column array causes `DivisionByZeroError`.** `Calculator::create([])` succeeds, but calling `getValues()` on an empty-column calculator throws `\DivisionByZeroError` inside `Operations::countColumns()` because the pipeline divides by column count. There is currently no user-friendly guard — ensure at least one column is supplied.
+- **Empty column array throws `\InvalidArgumentException`.** `Calculator::create([])` succeeds, but calling `getValues()` on an empty-column calculator throws `\InvalidArgumentException` with code `Calculator::ERROR_EMPTY_COLUMN_ARRAY` (61502). The guard is applied at the top of `getValues()` before the calculation pipeline runs.
 
 ## Option Defaults
 
@@ -37,7 +37,7 @@
 
 ## Recursion Safety
 
-- `SurplusRemover::remove()` recurses until surplus is fully absorbed. A private `$depth` counter caps the recursion at **100 iterations** to prevent a stack overflow in degenerate configurations where all columns are at `minWidth` and cannot absorb surplus. In normal operation, convergence happens in 1–3 passes. The counter is scoped to the `SurplusRemover` instance, which is created fresh per `Calculator` instance.
+- `SurplusRemover::remove()` is a stateless entry point that delegates immediately to the private `doRemove(int $depth)` helper, calling it with `$this->doRemove(0)`. All surplus-removal logic and recursion live in `doRemove()`. The depth guard fires at `$depth > 100`, returning immediately to cap recursion at **100 iterations** and prevent a stack overflow in degenerate configurations where all columns are at `minWidth` and cannot absorb surplus. In normal operation, convergence happens in 1–3 passes. There is no `$depth` instance property — the counter is passed as a method argument, making each `remove()` call fully stateless.
 
 ## Internal vs. Public Classes
 
@@ -50,12 +50,23 @@
 ## Dependency on `application-utils`
 
 - `Calculator` uses `Traits_Optionable` and `Interface_Optionable` from `mistralys/application-utils ^3.0` for its option management. Methods such as `getOption()`, `setOption()`, and `getBoolOption()` come from this trait — do not reimplement option storage independently.
+- **`getOption()` returns `mixed`.** When reading a numeric option and performing arithmetic or returning a typed `float`, you must narrow the type explicitly using an `is_numeric()` guard before casting. A bare `(float)` cast on a `mixed` value is rejected by PHPStan at level 9. Use the pattern below:
+  ```php
+  $raw = $this->getOption('myNumericOption');
+  return is_numeric($raw) ? (float)$raw : 0.0;
+  ```
+  `getBoolOption()` is already typed and does not require this guard.
 
 ## Namespace
 
 - Root namespace: `Mistralys\WidthsCalculator`
 - Internal workers namespace: `Mistralys\WidthsCalculator\Calculator`
 - Test classes namespace: `Mistralys\WidthsCalculatorUnitTests`
+
+## Static Analysis
+
+- **PHPStan is configured at level 9** via `docs/config/phpstan.neon`. Run the analyser with `composer analyze` (which passes `--configuration docs/config/phpstan.neon`) or directly with `vendor/bin/phpstan analyse --configuration docs/config/phpstan.neon`.
+- The codebase currently reports **0 errors at level 9**. All type-annotation and narrowing issues have been resolved. New contributions must not introduce regressions — verify with `composer analyze` before committing.
 
 ## Testing
 
@@ -68,7 +79,7 @@ Two protected helpers are available to all test cases:
 
 | Method | Signature | Purpose |
 |---|---|---|
-| `assertTotalEquals()` | `assertTotalEquals(int\|float $expected, array $values): void` | Asserts that `array_sum($values) === $expected`. Uses `assertSame` so `100` (int) and `100.0` (float) are treated as distinct. |
+| `assertTotalEquals()` | `assertTotalEquals(int\|float $expected, array<array-key, int\|float> $values, ?float $delta = null): void` | Asserts that `array_sum($values) === $expected`. When `$delta` is `null`, uses `assertSame` (strict type check; `100` and `100.0` are distinct). When `$delta` is non-null, uses `assertEqualsWithDelta($expected, $actual, $delta)` for floating-point tolerance comparisons. |
 | `assertCalculation()` | `assertCalculation(array $input, array $expectedOutput, int\|float\|null $maxTotal = null, int\|float\|null $minWidth = null, bool $floatMode = false): void` | Creates a `Calculator` from `$input`, applies any optional configuration, calls `getValues()`, and asserts both the output map and the total sum. |
 
 > **Note:** When passing a `$minWidth` argument to `assertCalculation()`, ensure the value satisfies `$minWidth <= getMaxMinWidth()`. The helper does not pre-validate this; an invalid value will surface as a `Calculator::ERROR_INVALID_MIN_WIDTH` (61501) exception from inside the helper.
