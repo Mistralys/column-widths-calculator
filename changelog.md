@@ -1,6 +1,10 @@
-### v2.1.0 - Production bug-fix release
-- Fixed `OverflowFixer::fix()` incorrectly casting adjusted values to `int` in float mode, breaking the decimal precision guaranteed by `setFloatValues()`. The fix now applies the `(int)` cast only in integer mode via an `isIntegerMode()` conditional.
-- Fixed `SurplusRemover::remove()` lacking a recursion depth guard. A degenerate configuration where all columns are at `minWidth` and cannot absorb surplus would previously trigger a fatal stack overflow. A 100-iteration depth cap is now enforced via a private property, matching the safe upper bound for any realistic column setup.
+### v2.1.0 - Bugfix & Dependencies
+- Core: Fixed decimal precision issues.
+- Core: Added a recursion depth guard. 
+- Tests: Added more tests to cover all aspects of the calculations.
+- Docs: Added agentic coding support with the manifest and `AGENTS.md`.
+- Code: Upgraded to PHP8.4 standards.
+- Dependencies: Updated AppUtils to [v3.2.0](https://github.com/Mistralys/application-utils/releases/tag/3.2.0).
 
 ### v2.0.0 - PHP 7.4 release
 - Upgraded the PHP code to 7.4 standards.
