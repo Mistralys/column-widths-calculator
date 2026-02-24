@@ -28,7 +28,7 @@
 	"prefer-stable" : true,
 	"require" : 
 	{
-		"mistralys/application-utils": "^3.0",
+		"mistralys/application-utils": ">=3.2",
 		"php" : ">=8.4"
 	},
 	"require-dev" : 
@@ -39,7 +39,6 @@
 	},
     "scripts": {
         "analyze": "php vendor/bin/phpstan analyse --configuration docs/config/phpstan.neon --memory-limit=900M",
-        "_analyze-save-note": "Forces exit 0 via || true — NOT FOR CI use",
         "analyze-save": "php vendor/bin/phpstan analyse --configuration docs/config/phpstan.neon --memory-limit=900M > phpstan-result.txt || true",
         "analyze-clear": "php vendor/bin/phpstan clear-result-cache",
         "test": "php vendor/bin/phpunit",
